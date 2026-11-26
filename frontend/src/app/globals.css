@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+:root {
+  --bg-canvas: #0E1015;
+  --bg-surface: #161922;
+  --bg-surface-elevated: #1C202B;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text-primary: #F3F4F6;
+  --text-muted: #9CA3AF;
+}
+
+@theme inline {
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-surface-elevated: var(--bg-surface-elevated);
+  --color-ink: var(--text-primary);
+  --color-ink-muted: var(--text-muted);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+}
+
+html {
+  color-scheme: dark;
+  background-color: #0E1015;
+}
+
+body {
+  background-color: #0E1015;
+  color: #F3F4F6;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Subtle dark atelier scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0E1015;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
