@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        User::query()->updateOrCreate(
+        User::query()->firstOrCreate(
             ['email' => 'kadiv.ga@apps.ipb.ac.id'],
             [
                 'name' => 'Kadiv GA Inari',
@@ -25,15 +25,15 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        DtiEdition::query()->firstOrCreate(
-            ['slug' => 'dti-vol-12-cyber-botanica'],
-            [
+        if (DtiEdition::query()->doesntExist()) {
+            DtiEdition::query()->create([
                 'title' => 'DTI Vol. 12 — Cyber Botanica',
+                'slug' => 'dti-vol-12-cyber-botanica',
                 'prompt' => 'Ilustrasikan karakter atau lingkungan bertema perpaduan flora tropis Nusantara dengan teknologi futuristik di malam hari. Eksplorasi pencahayaan bioluminesen dan kontras siluet yang tajam.',
                 'status' => EditionStatus::SubmissionOpen,
                 'submission_deadline' => now()->addDays(7),
                 'voting_deadline' => now()->addDays(14),
-            ]
-        );
+            ]);
+        }
     }
 }
