@@ -17,6 +17,8 @@ return [
 
     'media_disk' => env('MEDIA_DISK', 's3'),
 
+    'media_url' => env('MEDIA_URL'),
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
@@ -58,7 +60,9 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
+            'request_checksum_calculation' => env('AWS_REQUEST_CHECKSUM_CALCULATION', 'when_required'),
+            'response_checksum_validation' => env('AWS_RESPONSE_CHECKSUM_VALIDATION', 'when_required'),
+            'throw' => true,
             'report' => false,
         ],
 

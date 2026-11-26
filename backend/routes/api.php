@@ -6,12 +6,14 @@ use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\Admin\WhitelistedEmailController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EditionController;
+use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\SubmissionController;
 use App\Http\Controllers\Api\VoteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['status' => 'ok', 'service' => 'inari-dti-api']));
+Route::get('/media/{path}', [MediaController::class, 'show'])->where('path', '.*');
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');

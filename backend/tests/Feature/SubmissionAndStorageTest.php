@@ -95,4 +95,44 @@ class SubmissionAndStorageTest extends TestCase
 
         $this->assertEquals(EditionStatus::ExtensionPoll, $edition->fresh()->status);
     }
+
+    public function test_media_proxy_streams_valid_paths_and_uses_media_url(): void
+    {
+        Storage::fake('s3');
+        config()->set('filesystems.media_url', 'https://api.example.com/api/media');
+
+        $user = User::factory()->create(['email' => 'proxy@apps.ipb.ac.id']);
+        $edition = DtiEdition::query()->create([
+            'title' => 'Proxy Test',
+            'slug' => 'proxy-test',
+            'prompt' => 'Draw a lantern.',
+            'status' => EditionStatus::SubmissionOpen,
+            'submission_deadline' => now()->addDays(2),
+            'voting_deadline' => now()->addDays(5),
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->post("/api/editions/{$edition->id}/submissions", [
+                'image' => UploadedFile::fake()->image('lantern.png', 800, 600),
+            ]);
+
+        $response->assertCreated();
+        $submission = Submission::query()->firstOrFail();
+
+        $this->assertSame(
+            'https://api.example.com/api/media/' . $submission->thumbnail_path,
+            $submission->thumbnail_url,
+        );
+
+        $streamResponse = $this->get('/api/media/' . $submission->thumbnail_path);
+        $streamResponse->assertOk()
+            ->assertHeader('Content-Type', 'image/webp');
+        $this->assertStringContainsString(
+            'public',
+            (string) $streamResponse->headers->get('Cache-Control'),
+        );
+
+        $this->get('/api/media/private/secret.png')->assertNotFound();
+        $this->get('/api/media/editions/../secret.png')->assertNotFound();
+    }
 }

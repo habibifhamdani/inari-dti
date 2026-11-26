@@ -30,10 +30,25 @@ class ImageStorageService
     {
         $diskName = $this->diskName();
         $options = config("filesystems.disks.{$diskName}.driver") === 's3'
-            ? ['visibility' => 'public', 'ContentType' => $contentType]
+            ? ['ContentType' => $contentType]
             : ['visibility' => 'public'];
 
-        $this->disk()->put($path, $contents, $options);
+        $written = $this->disk()->put($path, $contents, $options);
+
+        if (! $written) {
+            throw new \RuntimeException("Failed writing media object [{$path}] to disk [{$diskName}].");
+        }
+    }
+
+    public function publicUrl(string $path): string
+    {
+        $mediaUrl = config('filesystems.media_url');
+
+        if (is_string($mediaUrl) && $mediaUrl !== '') {
+            return rtrim($mediaUrl, '/') . '/' . ltrim($path, '/');
+        }
+
+        return $this->disk()->url($path);
     }
 
     /**
@@ -80,11 +95,9 @@ class ImageStorageService
 
         $this->putPublic($thumbnailPath, (string) $thumbnailEncoded, 'image/webp');
 
-        $disk = $this->disk();
-
         return [
-            'image_url' => $disk->url($originalPath),
-            'thumbnail_url' => $disk->url($thumbnailPath),
+            'image_url' => $this->publicUrl($originalPath),
+            'thumbnail_url' => $this->publicUrl($thumbnailPath),
             'image_path' => $originalPath,
             'thumbnail_path' => $thumbnailPath,
             'image_width' => $width,
@@ -110,7 +123,7 @@ class ImageStorageService
         );
 
         return [
-            'url' => $this->disk()->url($path),
+            'url' => $this->publicUrl($path),
             'path' => $path,
         ];
     }
@@ -134,7 +147,7 @@ class ImageStorageService
         $this->putPublic($path, (string) $encoded, 'image/webp');
 
         return [
-            'url' => $this->disk()->url($path),
+            'url' => $this->publicUrl($path),
             'path' => $path,
         ];
     }
@@ -161,6 +174,21 @@ class ImageStorageService
         }
 
         return $disk->get($path);
+    }
+
+    /**
+     * Open a read stream for the stored media object if it exists.
+     *
+     * @return resource|null
+     */
+    public function readStream(string $path)
+    {
+        $disk = $this->disk();
+        if (! $disk->exists($path)) {
+            return null;
+        }
+
+        return $disk->readStream($path);
     }
 
     public function detectMimeType(string $path): string
