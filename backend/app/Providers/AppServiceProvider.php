@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Mail\Transport\BrevoTransport;
 use App\Models\DtiEdition;
 use App\Models\Submission;
 use App\Policies\DtiEditionPolicy;
@@ -11,6 +12,7 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,6 +27,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(DtiEdition::class, DtiEditionPolicy::class);
         Gate::policy(Submission::class, SubmissionPolicy::class);
+
+        Mail::extend('brevo', function (array $config = []): BrevoTransport {
+            return new BrevoTransport((string) ($config['key'] ?? config('services.brevo.key', '')));
+        });
 
         VerifyEmail::createUrlUsing(function (object $notifiable): string {
             $signedUrl = URL::temporarySignedRoute(
